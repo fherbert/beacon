@@ -16,6 +16,9 @@ just one host and as a receiver on all the other hosts
 #include <arpa/inet.h>
 #include <time.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <strings.h>
+#include <unistd.h>
 
 #define PORT 9131
 #define GROUP "239.255.250.250"
@@ -25,7 +28,7 @@ int main(int argc)
   struct sockaddr_in addr;
   int addrlen, sock, cnt;
   struct ip_mreq mreq;
-  char message[50];
+  char message[500];
 
   /* set up socket */
   sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -69,14 +72,15 @@ int main(int argc)
 		}         
 		while (1) {
 			cnt = recvfrom(sock, message, sizeof(message), 0, 
-			(struct sockaddr *) &addr, &addrlen);
+				(struct sockaddr *) &addr, &addrlen);
 			if (cnt < 0) {
-			perror("recvfrom");
-			exit(1);
+				perror("recvfrom");
+				exit(1);
 			} else if (cnt == 0) {
-			break;
+				break;
 			}
-			printf("%s: message = \"%s\"\n", inet_ntoa(addr.sin_addr), message);
+			message[cnt] = '\0';
+			printf("%s : %s\n", inet_ntoa(addr.sin_addr), message);
 		}
 	}
 }
